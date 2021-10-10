@@ -1,4 +1,5 @@
-﻿using System;
+﻿using APICatalogo.Attributes;
+using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -16,6 +17,7 @@ namespace APICatalogo.Models
         public string Descricao { get; set; }
 
         [Required]
+        [PrecisionAndScale(18,2, ErrorMessage = "Custo total não poderá exceder um valor de 18 digitos")]
         public decimal Preco { get; set; }
 
         [Required]
