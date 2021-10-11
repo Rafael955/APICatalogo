@@ -50,7 +50,7 @@ namespace APICatalogo.Controllers
             return new CreatedAtRouteResult("ObterProduto", new { id = produto.Id }, produto);
         }
 
-        [HttpPut("{id}")]
+        [HttpPut("{id:int}")]
         public ActionResult Put(int id, [FromBody] Produto produto)
         {
             //if (!ModelState.IsValid)
@@ -78,7 +78,7 @@ namespace APICatalogo.Controllers
             return Ok();
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("{id:int}")]
         public ActionResult<Produto> Delete(int id)
         {
             //var produto = _context.Produtos.FirstOrDefault(x => x.Id == id);
