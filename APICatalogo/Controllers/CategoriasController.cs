@@ -26,6 +26,12 @@ namespace APICatalogo.Controllers
             return _context.Categorias.AsNoTracking().ToList();
         }
 
+        [HttpGet("produtos")]
+        public ActionResult<IEnumerable<Categoria>> GetCategoriasProdutos()
+        {
+            return _context.Categorias.Include(x => x.Produtos).AsNoTracking().ToList();
+        }
+
         [HttpGet("{id:int}", Name = "ObterCategoria")]
         public ActionResult<Categoria> Get(int id)
         {
@@ -53,7 +59,9 @@ namespace APICatalogo.Controllers
             _context.Entry(categoria).State = EntityState.Modified;
             _context.SaveChanges();
 
-            return Ok();
+            var categoriaAlt = _context.Categorias.Find(id);
+
+            return Ok(categoriaAlt);
         }
 
         [HttpDelete("{id:int}")]
