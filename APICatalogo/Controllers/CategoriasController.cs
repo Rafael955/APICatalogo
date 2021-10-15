@@ -68,43 +68,59 @@ namespace APICatalogo.Controllers
         [HttpPost]
         public ActionResult Post([FromBody] Categoria categoria)
         {
-            if (!ModelState.IsValid)
-                return BadRequest();
+            try
+            {
+                _context.Categorias.Add(categoria);
+                _context.SaveChanges();
 
-            _context.Categorias.Add(categoria);
-            _context.SaveChanges();
-
-            return new CreatedAtRouteResult("ObterCategoria", new { id = categoria.Id }, categoria);
+                return new CreatedAtRouteResult("ObterCategoria", new { id = categoria.Id }, categoria);
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "Erro ao tentar criar nova categoria!");
+            }
         }
 
         [HttpPut("{id:int}")]
         public ActionResult Put(int id, [FromBody] Categoria categoria)
         {
-            if (id != categoria.Id)
-                return BadRequest();
+            try
+            {
+                if (id != categoria.Id)
+                    return BadRequest($"Não foi possível atualizar a categoria com ID {id}");
 
-            _context.Entry(categoria).State = EntityState.Modified;
-            _context.SaveChanges();
+                _context.Entry(categoria).State = EntityState.Modified;
+                _context.SaveChanges();
 
-            var categoriaAlt = _context.Categorias.Find(id);
+                var categoriaAlt = _context.Categorias.Find(id);
 
-            return Ok(categoriaAlt);
+                return Ok(categoriaAlt);
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, $"Não foi possível atualizar a categoria com ID {id}");
+            }
         }
 
         [HttpDelete("{id:int}")]
         public ActionResult<Categoria> Delete(int id)
         {
-            var categoria = _context.Categorias.Find(id);
+            try
+            {
+                var categoria = _context.Categorias.Find(id);
 
-            if (categoria == null)
-                return NotFound();
+                if (categoria == null)
+                    return NotFound($"A categoria com ID {id} não foi encontrada!");
 
-            _context.Categorias.Remove(categoria);
-            _context.SaveChanges();
+                _context.Categorias.Remove(categoria);
+                _context.SaveChanges();
 
-            return categoria;
+                return categoria;
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, $"Não foi possível excluir a categoria com ID {id}");
+            }
         }
-
-
     }
 }
