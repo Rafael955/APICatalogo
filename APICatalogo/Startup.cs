@@ -29,7 +29,7 @@ namespace APICatalogo
         {
             var mySqlConnection = Configuration.GetConnectionString("DefaultConnection");
 
-            services.AddDbContext<ApplicationDbContext>(options => options.UseMySql(mySqlConnection, ServerVersion.AutoDetect(mySqlConnection)));
+            services.AddDbContextPool<ApplicationDbContext>(options => options.UseMySql(mySqlConnection, ServerVersion.AutoDetect(mySqlConnection)));
 
             services.AddControllers()
                 .AddNewtonsoftJson(options => 
@@ -48,12 +48,16 @@ namespace APICatalogo
 
             app.UseHttpsRedirection();
 
+            //adiciona o middleware de roteamento
             app.UseRouting();
 
             app.UseAuthorization();
 
+            //Adiciona o middleware que executa o endpoint do request atual
             app.UseEndpoints(endpoints =>
             {
+                //adiciona os endpoints para as Actions
+                // dos controladores sem especificar rotas
                 endpoints.MapControllers();
             });
         }

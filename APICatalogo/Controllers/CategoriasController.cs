@@ -22,11 +22,11 @@ namespace APICatalogo.Controllers
         }
 
         [HttpGet]
-        public ActionResult<IEnumerable<Categoria>> Get()
+        public async Task<ActionResult<IEnumerable<Categoria>>> Get()
         {
             try
             {
-                return _context.Categorias.AsNoTracking().ToList();
+                return await _context.Categorias.AsNoTracking().ToListAsync();
             }
             catch
             {
@@ -35,11 +35,11 @@ namespace APICatalogo.Controllers
         }
 
         [HttpGet("produtos")]
-        public ActionResult<IEnumerable<Categoria>> GetCategoriasProdutos()
+        public async Task<ActionResult<IEnumerable<Categoria>>> GetCategoriasProdutos()
         {
             try
             {
-                return _context.Categorias.Include(x => x.Produtos).AsNoTracking().ToList();
+                return await _context.Categorias.Include(x => x.Produtos).AsNoTracking().ToListAsync();
             }
             catch (Exception)
             {
@@ -47,12 +47,13 @@ namespace APICatalogo.Controllers
             }
         }
 
-        [HttpGet("{id:int}", Name = "ObterCategoria")]
+        //api/categorias/[numero inteiro > 0]
+        [HttpGet("{id:int:min(1)}", Name = "ObterCategoria")] //min(1) - estipula um ID mínimo igual a 1
         public ActionResult<Categoria> Get(int id)
         {
             try
             {
-                var categoria = _context.Categorias.AsNoTracking().FirstOrDefault(x => x.Id == id);
+                var categoria =  _context.Categorias.AsNoTracking().FirstOrDefault(x => x.Id == id);
 
                 if (categoria == null)
                     return NotFound($"Categoria com ID {id} não foi encontrada!");
@@ -61,7 +62,20 @@ namespace APICatalogo.Controllers
             }
             catch (Exception)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, "Erro ao tentar obter as categorias do banco de dados!");
+                return StatusCode(StatusCodes.Status500InternalServerError, "Erro ao tentar obter a categoria do banco de dados!");
+            }
+        }
+
+        [HttpGet("/primeiro")] // A barra(/) ignora a rota estabelecida no atributo [Route] decorando a classe
+        public ActionResult<Categoria> GetPrimeiro()
+        {
+            try
+            {
+                return _context.Categorias.AsNoTracking().FirstOrDefault();
+            }
+            catch
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "Erro ao tentar obter a categoria do banco de dados!");
             }
         }
 
