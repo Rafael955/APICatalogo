@@ -1,5 +1,6 @@
 ﻿using APICatalogo.Context;
 using APICatalogo.Models;
+using APICatalogo.Servicos.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -19,6 +20,12 @@ namespace APICatalogo.Controllers
         public CategoriasController(ApplicationDbContext context)
         {
             _context = context;
+        }
+
+        [HttpGet("saudacao/{nome:maxlength(15)}")]
+        public ActionResult<string> GetSaudacao([FromServices] IMeuServico meuservico, string nome)
+        {
+            return meuservico.Saudacao(nome);
         }
 
         [HttpGet]

@@ -1,4 +1,6 @@
 using APICatalogo.Context;
+using APICatalogo.Servicos;
+using APICatalogo.Servicos.Interfaces;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -30,6 +32,8 @@ namespace APICatalogo
             var mySqlConnection = Configuration.GetConnectionString("DefaultConnection");
 
             services.AddDbContextPool<ApplicationDbContext>(options => options.UseMySql(mySqlConnection, ServerVersion.AutoDetect(mySqlConnection)));
+
+            services.AddTransient<IMeuServico, MeuServico>();
 
             services.AddControllers()
                 .AddNewtonsoftJson(options => 

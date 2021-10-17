@@ -41,7 +41,7 @@ namespace APICatalogo.Controllers
         [HttpPost]
         public ActionResult Post([FromBody] Produto produto)
         {
-            //NÃO É NECESSÁRIO VERIRICAR SE MODELSTATE É VÁLIDO POR CONTA DO ATTRIBUTE [Route("api/[controller]")]
+            //NÃO É NECESSÁRIO VERIRICAR SE MODELSTATE É VÁLIDO POR CONTA DO ATTRIBUTE [ApiController]")]
             //if (!ModelState.IsValid)
             //    return BadRequest(ModelState);
 
