@@ -1,14 +1,17 @@
-﻿using System;
+﻿using APICatalogo.Validations;
+using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace APICatalogo.Models
 {
     [Table("Produtos")]
-    public class Produto : Entity<int>
+    public class Produto : Entity<int>, IValidatableObject
     {
         [Required(ErrorMessage = "O nome é obrigatório")]
         [StringLength(20, ErrorMessage = "O nome deverá ter entre {2} e {1} caracteres", MinimumLength = 5)]
+        //[PrimeiraLetraMaiuscula]
         public string Nome { get; set; }
 
         [Required(ErrorMessage = "A descrição é obrigatório")]
@@ -32,5 +35,34 @@ namespace APICatalogo.Models
         public virtual Categoria Categoria { get; set; }
 
         public int CategoriaId { get; set; }
+
+
+        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+        {
+            if (!string.IsNullOrEmpty(Nome))
+            {
+                var primeiraLetra = Nome[0].ToString();
+
+                if (primeiraLetra != primeiraLetra.ToUpper())
+                {
+                    yield return
+                        new ValidationResult("A primeira letra do nome do produto deverá ser maiuscula!",
+                        new[]
+                        {
+                            nameof(Nome)
+                        });
+                }
+            }
+
+            if (Estoque <= 0)
+            {
+                yield return
+                    new ValidationResult("O estoque deverá ser maior do que zero!",
+                    new[]
+                    {
+                        nameof(Estoque)
+                    });
+            }
+        }
     }
 }

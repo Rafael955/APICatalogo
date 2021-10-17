@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 namespace APICatalogo.Controllers
 {
     [Route("api/[controller]")]
-    [ApiController]
+    //[ApiController]
     public class ProdutosController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
@@ -42,8 +42,8 @@ namespace APICatalogo.Controllers
         public ActionResult Post([FromBody] Produto produto)
         {
             //NÃO É NECESSÁRIO VERIRICAR SE MODELSTATE É VÁLIDO POR CONTA DO ATTRIBUTE [ApiController]")]
-            //if (!ModelState.IsValid)
-            //    return BadRequest(ModelState);
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
 
             _context.Produtos.Add(produto);
             _context.SaveChanges();
