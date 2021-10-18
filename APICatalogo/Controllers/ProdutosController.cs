@@ -32,6 +32,13 @@ namespace APICatalogo.Controllers
         [HttpGet("{id:int}", Name = "ObterProduto")]
         public ActionResult<Produto> Get(int id)
         {
+            ////throw new Exception("Exception ao retornar produto pelo id!");
+            //string[] teste = null;
+            //if(teste.Length > 0)
+            //{
+
+            //}
+
             var produto = _context.Produtos.AsNoTracking().FirstOrDefault(p => p.Id == id);
 
             if (produto == null)

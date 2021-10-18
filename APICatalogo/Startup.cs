@@ -1,4 +1,5 @@
 using APICatalogo.Context;
+using APICatalogo.Exceptions;
 using APICatalogo.Filters;
 using APICatalogo.Servicos;
 using APICatalogo.Servicos.Interfaces;
@@ -51,6 +52,9 @@ namespace APICatalogo
             {
                 app.UseDeveloperExceptionPage();
             }
+
+            //adiciona o middleware de tratamento de erros
+            app.ConfigureExceptionHandler();
 
             //adiciona o middleware para redirecionar para HTTPS
             app.UseHttpsRedirection();
