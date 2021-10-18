@@ -1,4 +1,5 @@
 using APICatalogo.Context;
+using APICatalogo.Filters;
 using APICatalogo.Servicos;
 using APICatalogo.Servicos.Interfaces;
 using Microsoft.AspNetCore.Builder;
@@ -33,6 +34,7 @@ namespace APICatalogo
 
             services.AddDbContextPool<ApplicationDbContext>(options => options.UseMySql(mySqlConnection, ServerVersion.AutoDetect(mySqlConnection)));
 
+            services.AddScoped<ApiLoggingFilter>();
             services.AddTransient<IMeuServico, MeuServico>();
 
             services.AddControllers()
@@ -50,11 +52,14 @@ namespace APICatalogo
                 app.UseDeveloperExceptionPage();
             }
 
+            //adiciona o middleware para redirecionar para HTTPS
             app.UseHttpsRedirection();
 
             //adiciona o middleware de roteamento
             app.UseRouting();
 
+            app.UseAuthentication();
+            
             app.UseAuthorization();
 
             //Adiciona o middleware que executa o endpoint do request atual

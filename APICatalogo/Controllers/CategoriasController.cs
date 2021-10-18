@@ -4,6 +4,7 @@ using APICatalogo.Servicos.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,10 +17,22 @@ namespace APICatalogo.Controllers
     public class CategoriasController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
+        private readonly IConfiguration _configuration;
 
-        public CategoriasController(ApplicationDbContext context)
+        public CategoriasController(ApplicationDbContext context, IConfiguration config)
         {
             _context = context;
+            _configuration = config;
+        }
+
+        [HttpGet("autor")]
+        public string GetAutor()
+        {
+            var autor = _configuration["autor"];
+            //Pegando a string de conexão
+            //var connectionString = _configuration["ConnectionStrings:DefaultConnection"];
+
+            return $"Autor: {autor}";
         }
 
         [HttpGet("saudacao/{nome:maxlength(15)}")]
