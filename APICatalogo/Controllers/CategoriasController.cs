@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,11 +19,13 @@ namespace APICatalogo.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly IConfiguration _configuration;
+        private readonly ILogger _logger;
 
-        public CategoriasController(ApplicationDbContext context, IConfiguration config)
+        public CategoriasController(ApplicationDbContext context, IConfiguration config, ILogger<CategoriasController> logger)
         {
             _context = context;
             _configuration = config;
+            _logger = logger;
         }
 
         [HttpGet("autor")]
@@ -59,6 +62,8 @@ namespace APICatalogo.Controllers
         {
             try
             {
+                _logger.LogInformation(" ============== GET api/categorias/produtos ============== ");
+
                 return await _context.Categorias.Include(x => x.Produtos).AsNoTracking().ToListAsync();
             }
             catch (Exception)
@@ -73,10 +78,15 @@ namespace APICatalogo.Controllers
         {
             try
             {
+                _logger.LogInformation($" ============== GET api/categorias/produtos/{id} ============== ");
+
                 var categoria =  _context.Categorias.AsNoTracking().FirstOrDefault(x => x.Id == id);
 
                 if (categoria == null)
+                {
+                    _logger.LogInformation($" ============== GET api/categorias/produtos/{id} NOT FOUND ============== ");
                     return NotFound($"Categoria com ID {id} não foi encontrada!");
+                }
 
                 return categoria;
             }

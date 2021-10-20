@@ -1,6 +1,7 @@
 using APICatalogo.Context;
 using APICatalogo.Exceptions;
 using APICatalogo.Filters;
+using APICatalogo.Logging;
 using APICatalogo.Servicos;
 using APICatalogo.Servicos.Interfaces;
 using Microsoft.AspNetCore.Builder;
@@ -46,12 +47,21 @@ namespace APICatalogo
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory)
         {
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
             }
+            else
+            {
+                app.UseHsts();
+            }
+
+            loggerFactory.AddProvider(new CustomLoggerProvider( new CustomLoggerProviderConfiguration 
+            { 
+                LogLevel = LogLevel.Information
+            }));
 
             //adiciona o middleware de tratamento de erros
             app.ConfigureExceptionHandler();
