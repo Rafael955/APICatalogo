@@ -1,6 +1,7 @@
 ﻿using APICatalogo.Context;
 using APICatalogo.Filters;
 using APICatalogo.Models;
+using APICatalogo.Repository.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
@@ -12,21 +13,28 @@ using System.Threading.Tasks;
 namespace APICatalogo.Controllers
 {
     [Route("api/[controller]")]
-    //[ApiController]
+    [ApiController]
     public class ProdutosController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
+        //private readonly ApplicationDbContext _context;
+        private readonly IUnitOfWork _uow;
 
-        public ProdutosController(ApplicationDbContext context)
+        public ProdutosController(IUnitOfWork uof)
         {
-            _context = context;
+            _uow = uof;
+        }
+
+        [HttpGet("menor-preco")]
+        public ActionResult<IEnumerable<Produto>> GetProdutosPrecos()
+        {
+            return _uow.ProdutoRepository.GetProdutosPorPreco().ToList();
         }
 
         [HttpGet]
-        [ServiceFilter(typeof(ApiLoggingFilter))]
-        public async Task<ActionResult<IEnumerable<Produto>>> Get()
+        //[ServiceFilter(typeof(ApiLoggingFilter))]
+        public ActionResult<IEnumerable<Produto>> Get()
         {
-            return await _context.Produtos.AsNoTracking().ToListAsync();
+            return _uow.ProdutoRepository.Get().AsNoTracking().ToList();
         }
 
         [HttpGet("{id:int}", Name = "ObterProduto")]
@@ -39,7 +47,7 @@ namespace APICatalogo.Controllers
 
             //}
 
-            var produto = _context.Produtos.AsNoTracking().FirstOrDefault(p => p.Id == id);
+            var produto = _uow.ProdutoRepository.GetById(x => x.Id == id);
 
             if (produto == null)
                 return NotFound();
@@ -51,11 +59,11 @@ namespace APICatalogo.Controllers
         public ActionResult Post([FromBody] Produto produto)
         {
             //NÃO É NECESSÁRIO VERIRICAR SE MODELSTATE É VÁLIDO POR CONTA DO ATTRIBUTE [ApiController]")]
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+            //if (!ModelState.IsValid)
+            //    return BadRequest(ModelState);
 
-            _context.Produtos.Add(produto);
-            _context.SaveChanges();
+            _uow.ProdutoRepository.Add(produto);
+            _uow.Commit();
 
             return new CreatedAtRouteResult("ObterProduto", new { id = produto.Id }, produto);
         }
@@ -69,7 +77,7 @@ namespace APICatalogo.Controllers
             if (id != produto.Id)
                 return BadRequest();
             //Minha versão
-            //var _produto = _context.Produtos.Find(id);
+            //var _produto = _uow.Produtos.Find(id);
 
             //_produto.Descricao = produto.Descricao;
             //_produto.ImagemUrl = produto.ImagemUrl;
@@ -78,12 +86,11 @@ namespace APICatalogo.Controllers
             //_produto.Estoque = produto.Estoque;
             //_produto.CategoriaId = produto.CategoriaId;
 
-            //_context.Produtos.Update(_produto);
-            //_context.SaveChanges();
+            //_uow.Produtos.Update(_produto);
+            //_uow.SaveChanges();
 
             //Versão do professor
-            _context.Entry(produto).State = EntityState.Modified;
-            _context.SaveChanges();
+            _uow.ProdutoRepository.Update(produto);
 
             return Ok();
         }
@@ -91,14 +98,14 @@ namespace APICatalogo.Controllers
         [HttpDelete("{id:int}")]
         public ActionResult<Produto> Delete(int id)
         {
-            //var produto = _context.Produtos.FirstOrDefault(x => x.Id == id);
-            var produto = _context.Produtos.Find(id); //Obs: Vantagem do método Find, ele busca primeiro em memória, se não achar ele vai até o banco de dados, FirstOrDefault vai direto ao banco.
+            //var produto = _uow.Produtos.FirstOrDefault(x => x.Id == id);
+            var produto = _uow.ProdutoRepository.GetById(x =>x.Id == id); //Obs: Vantagem do método Find, ele busca primeiro em memória, se não achar ele vai até o banco de dados, FirstOrDefault vai direto ao banco.
 
             if (produto == null)
                 return NotFound();
 
-            _context.Produtos.Remove(produto);
-            _context.SaveChanges();
+            _uow.ProdutoRepository.Delete(produto);
+            _uow.Commit();
 
             return produto;
         }

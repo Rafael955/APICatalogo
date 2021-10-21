@@ -2,6 +2,8 @@ using APICatalogo.Context;
 using APICatalogo.Exceptions;
 using APICatalogo.Filters;
 using APICatalogo.Logging;
+using APICatalogo.Repository;
+using APICatalogo.Repository.Interfaces;
 using APICatalogo.Servicos;
 using APICatalogo.Servicos.Interfaces;
 using Microsoft.AspNetCore.Builder;
@@ -33,6 +35,8 @@ namespace APICatalogo
         public void ConfigureServices(IServiceCollection services)
         {
             var mySqlConnection = Configuration.GetConnectionString("DefaultConnection");
+
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
 
             services.AddDbContextPool<ApplicationDbContext>(options => options.UseMySql(mySqlConnection, ServerVersion.AutoDetect(mySqlConnection)));
 
