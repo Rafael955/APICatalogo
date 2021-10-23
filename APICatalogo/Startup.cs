@@ -1,4 +1,5 @@
 using APICatalogo.Context;
+using APICatalogo.DTOs.Mappings;
 using APICatalogo.Exceptions;
 using APICatalogo.Filters;
 using APICatalogo.Logging;
@@ -6,6 +7,7 @@ using APICatalogo.Repository;
 using APICatalogo.Repository.Interfaces;
 using APICatalogo.Servicos;
 using APICatalogo.Servicos.Interfaces;
+using AutoMapper;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -34,6 +36,14 @@ namespace APICatalogo
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            var mappingConfig = new MapperConfiguration(x =>
+            {
+                x.AddProfile(new MappingProfile());
+            });
+
+            IMapper mapper = mappingConfig.CreateMapper();
+            services.AddSingleton(mapper);
+
             var mySqlConnection = Configuration.GetConnectionString("DefaultConnection");
 
             services.AddScoped<IUnitOfWork, UnitOfWork>();
@@ -44,7 +54,7 @@ namespace APICatalogo
             services.AddTransient<IMeuServico, MeuServico>();
 
             services.AddControllers()
-                .AddNewtonsoftJson(options => 
+                .AddNewtonsoftJson(options =>
                 {
                     options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
                 });
@@ -62,8 +72,8 @@ namespace APICatalogo
                 app.UseHsts();
             }
 
-            loggerFactory.AddProvider(new CustomLoggerProvider( new CustomLoggerProviderConfiguration 
-            { 
+            loggerFactory.AddProvider(new CustomLoggerProvider(new CustomLoggerProviderConfiguration
+            {
                 LogLevel = LogLevel.Information
             }));
 
@@ -77,7 +87,7 @@ namespace APICatalogo
             app.UseRouting();
 
             app.UseAuthentication();
-            
+
             app.UseAuthorization();
 
             //Adiciona o middleware que executa o endpoint do request atual

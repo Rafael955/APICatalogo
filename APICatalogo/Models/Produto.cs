@@ -1,4 +1,5 @@
-﻿using APICatalogo.Validations;
+﻿using APICatalogo.DTOs;
+using APICatalogo.Validations;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -36,6 +37,19 @@ namespace APICatalogo.Models
 
         public int CategoriaId { get; set; }
 
+        //Alternativa nativa do c# ao AutoMapper
+        //public static implicit operator Produto(ProdutoDTO produtoDto)
+        //{
+        //    return new Produto
+        //    {
+        //        Id = produtoDto.ProdutoId,
+        //        Descricao = produtoDto.Descricao,
+        //        CategoriaId = produtoDto.CategoriaId,
+        //        ImagemUrl = produtoDto.ImagemUrl,
+        //        Nome = produtoDto.Nome,
+        //        Preco = produtoDto.Preco
+        //    };
+        //}
 
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
