@@ -31,16 +31,16 @@ namespace APICatalogo.Controllers
         }
 
         [HttpGet("menor-preco")]
-        public ActionResult<IEnumerable<ProdutoDTO>> GetProdutosPrecos()
+        public async Task<ActionResult<IEnumerable<ProdutoDTO>>> GetProdutosPrecos()
         {
-            return _mapper.Map<List<ProdutoDTO>>(_uow.ProdutoRepository.GetProdutosPorPreco().ToList());
+            return _mapper.Map<List<ProdutoDTO>>(await _uow.ProdutoRepository.GetProdutosPorPreco());
         }
 
         [HttpGet]
         //[ServiceFilter(typeof(ApiLoggingFilter))]
-        public ActionResult<IEnumerable<ProdutoDTO>> Get([FromQuery] ProdutosParameters produtosParameters)
+        public async Task<ActionResult<IEnumerable<ProdutoDTO>>> Get([FromQuery] ProdutosParameters produtosParameters)
         {
-            var produtos = _uow.ProdutoRepository.GetProdutos(produtosParameters);
+            var produtos = await _uow.ProdutoRepository.GetProdutos(produtosParameters);
 
             //informações para se incluir no header do HTTP response;
             var metadata = new
@@ -62,7 +62,7 @@ namespace APICatalogo.Controllers
         }
 
         [HttpGet("{id:int}", Name = "ObterProduto")]
-        public ActionResult<ProdutoDTO> Get(int id)
+        public async Task<ActionResult<ProdutoDTO>> Get(int id)
         {
             ////throw new Exception("Exception ao retornar produto pelo id!");
             //string[] teste = null;
@@ -71,7 +71,7 @@ namespace APICatalogo.Controllers
 
             //}
 
-            var produto = _uow.ProdutoRepository.GetById(x => x.Id == id);
+            var produto = await _uow.ProdutoRepository.GetById(x => x.Id == id);
 
             if (produto == null)
                 return NotFound();
@@ -80,7 +80,7 @@ namespace APICatalogo.Controllers
         }
 
         [HttpPost]
-        public ActionResult Post([FromBody] ProdutoDTO produtoDto)
+        public async Task<ActionResult> Post([FromBody] ProdutoDTO produtoDto)
         {
             //NÃO É NECESSÁRIO VERIRICAR SE MODELSTATE É VÁLIDO POR CONTA DO ATTRIBUTE [ApiController]")]
             //if (!ModelState.IsValid)
@@ -88,7 +88,7 @@ namespace APICatalogo.Controllers
             var produto = _mapper.Map<Produto>(produtoDto);
 
             _uow.ProdutoRepository.Add(produto);
-            _uow.Commit();
+            await _uow.Commit();
 
             var produtoDTO = _mapper.Map<ProdutoDTO>(produto);
 
@@ -96,7 +96,7 @@ namespace APICatalogo.Controllers
         }
 
         [HttpPut("{id:int}")]
-        public ActionResult Put(int id, [FromBody] ProdutoDTO produtoDto)
+        public async Task<ActionResult> Put(int id, [FromBody] ProdutoDTO produtoDto)
         {
             //if (!ModelState.IsValid)
             //    return BadRequest(ModelState);
@@ -118,21 +118,22 @@ namespace APICatalogo.Controllers
 
             //Versão do professor
             _uow.ProdutoRepository.Update(_mapper.Map<Produto>(produtoDto));
+            await _uow.Commit();
 
             return Ok();
         }
 
         [HttpDelete("{id:int}")]
-        public ActionResult<ProdutoDTO> Delete(int id)
+        public async Task<ActionResult<ProdutoDTO>> Delete(int id)
         {
             //var produto = _uow.Produtos.FirstOrDefault(x => x.Id == id);
-            var produto = _uow.ProdutoRepository.GetById(x => x.Id == id); //Obs: Vantagem do método Find, ele busca primeiro em memória, se não achar ele vai até o banco de dados, FirstOrDefault vai direto ao banco.
+            var produto = await _uow.ProdutoRepository.GetById(x => x.Id == id); //Obs: Vantagem do método Find, ele busca primeiro em memória, se não achar ele vai até o banco de dados, FirstOrDefault vai direto ao banco.
 
             if (produto == null)
                 return NotFound();
 
             _uow.ProdutoRepository.Delete(produto);
-            _uow.Commit();
+            await _uow.Commit();
 
             return _mapper.Map<ProdutoDTO>(produto);
         }

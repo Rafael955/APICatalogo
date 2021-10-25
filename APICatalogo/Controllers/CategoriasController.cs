@@ -36,28 +36,28 @@ namespace APICatalogo.Controllers
             _mapper = mapper;
         }
 
-        [HttpGet("autor")]
-        public string GetAutor()
-        {
-            var autor = _configuration["autor"];
-            //Pegando a string de conexão
-            //var connectionString = _configuration["ConnectionStrings:DefaultConnection"];
-
-            return $"Autor: {autor}";
-        }
-
-        [HttpGet("saudacao/{nome:maxlength(15)}")]
-        public ActionResult<string> GetSaudacao([FromServices] IMeuServico meuservico, string nome)
-        {
-            return meuservico.Saudacao(nome);
-        }
-
-        [HttpGet]
-        public ActionResult<IEnumerable<CategoriaDTO>> Get([FromQuery] CategoriasParameters categoriasParameters)
+        [HttpGet("produtos")]
+        public async Task<ActionResult<IEnumerable<CategoriaDTO>>> GetCategoriasProdutos()
         {
             try
             {
-                var categorias = _uow.CategoriaRepository.GetCategorias(categoriasParameters);
+                //_logger.LogInformation(" ============== GET api/categorias/produtos ============== ");
+                var categoriasProdutoes = await _uow.CategoriaRepository.GetCategoriaProdutos();
+
+                return _mapper.Map<List<CategoriaDTO>>(categoriasProdutoes);
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "Erro ao tentar obter as categorias do banco de dados!");
+            }
+        }
+
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<CategoriaDTO>>> Get([FromQuery] CategoriasParameters categoriasParameters)
+        {
+            try
+            {
+                var categorias = await _uow.CategoriaRepository.GetCategorias(categoriasParameters);
 
                 var metadata = new
                 {
@@ -82,31 +82,14 @@ namespace APICatalogo.Controllers
             }
         }
 
-        [HttpGet("produtos")]
-        public ActionResult<IEnumerable<CategoriaDTO>> GetCategoriasProdutos()
-        {
-            try
-            {
-                //_logger.LogInformation(" ============== GET api/categorias/produtos ============== ");
-                var categoriasProdutoes = _uow.CategoriaRepository.GetCategoriaProdutos().ToList();
-
-                return _mapper.Map<List<CategoriaDTO>>(categoriasProdutoes);
-            }
-            catch (Exception)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, "Erro ao tentar obter as categorias do banco de dados!");
-            }
-        }
-
         //api/categorias/[numero inteiro > 0]
         [HttpGet("{id:int:min(1)}", Name = "ObterCategoria")] //min(1) - estipula um ID mínimo igual a 1
-        public ActionResult<CategoriaDTO> Get(int id)
+        public async Task<ActionResult<CategoriaDTO>> Get(int id)
         {
             try
             {
                 //_logger.LogInformation($" ============== GET api/categorias/produtos/{id} ============== ");
-
-                var categoria = _uow.CategoriaRepository.GetById(x => x.Id == id);
+                var categoria = await _uow.CategoriaRepository.GetById(x => x.Id == id);
 
                 if (categoria == null)
                 {
@@ -122,26 +105,13 @@ namespace APICatalogo.Controllers
             }
         }
 
-        [HttpGet("/primeiro")] // A barra(/) ignora a rota estabelecida no atributo [Route] decorando a classe
-        public ActionResult<CategoriaDTO> GetPrimeiro()
-        {
-            try
-            {
-                return _mapper.Map<CategoriaDTO>(_uow.CategoriaRepository.Get().FirstOrDefault());
-            }
-            catch
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, "Erro ao tentar obter a categoria do banco de dados!");
-            }
-        }
-
         [HttpPost]
-        public ActionResult Post([FromBody] CategoriaDTO categoriaDto)
+        public async Task<ActionResult> Post([FromBody] CategoriaDTO categoriaDto)
         {
             try
             {
                 _uow.CategoriaRepository.Add(_mapper.Map<Categoria>(categoriaDto));
-                _uow.Commit();
+                await _uow.Commit();
 
                 return new CreatedAtRouteResult("ObterCategoria", new { id = categoriaDto.CategoriaId }, categoriaDto);
             }
@@ -152,7 +122,7 @@ namespace APICatalogo.Controllers
         }
 
         [HttpPut("{id:int}")]
-        public ActionResult Put(int id, [FromBody] CategoriaDTO categoriaDto)
+        public async Task<ActionResult> Put(int id, [FromBody] CategoriaDTO categoriaDto)
         {
             try
             {
@@ -160,7 +130,7 @@ namespace APICatalogo.Controllers
                     return BadRequest($"Não foi possível atualizar a categoria com ID {id}");
 
                 _uow.CategoriaRepository.Update(_mapper.Map<Categoria>(categoriaDto));
-                _uow.Commit();
+                await _uow.Commit();
 
                 var categoriaAlt = _uow.CategoriaRepository.GetById(x => x.Id == id);
 
@@ -173,17 +143,17 @@ namespace APICatalogo.Controllers
         }
 
         [HttpDelete("{id:int}")]
-        public ActionResult<CategoriaDTO> Delete(int id)
+        public async Task<ActionResult<CategoriaDTO>> Delete(int id)
         {
             try
             {
-                var categoria = _uow.CategoriaRepository.GetById(x => x.Id == id);
+                var categoria = await _uow.CategoriaRepository.GetById(x => x.Id == id);
 
                 if (categoria == null)
                     return NotFound($"A categoria com ID {id} não foi encontrada!");
 
                 _uow.CategoriaRepository.Delete(categoria);
-                _uow.Commit();
+                await _uow.Commit();
 
                 return _mapper.Map<CategoriaDTO>(categoria);
             }
@@ -192,5 +162,34 @@ namespace APICatalogo.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, $"Não foi possível excluir a categoria com ID {id}");
             }
         }
+
+        //[HttpGet("autor")]
+        //public string GetAutor()
+        //{
+        //    var autor = _configuration["autor"];
+        //    //Pegando a string de conexão
+        //    //var connectionString = _configuration["ConnectionStrings:DefaultConnection"];
+
+        //    return $"Autor: {autor}";
+        //}
+
+        //[HttpGet("/primeiro")] // A barra(/) ignora a rota estabelecida no atributo [Route] decorando a classe
+        //public ActionResult<CategoriaDTO> GetPrimeiro()
+        //{
+        //    try
+        //    {
+        //        return _mapper.Map<CategoriaDTO>(_uow.CategoriaRepository.Get().FirstOrDefault());
+        //    }
+        //    catch
+        //    {
+        //        return StatusCode(StatusCodes.Status500InternalServerError, "Erro ao tentar obter a categoria do banco de dados!");
+        //    }
+        //}
+
+        //[HttpGet("saudacao/{nome:maxlength(15)}")]
+        //public ActionResult<string> GetSaudacao([FromServices] IMeuServico meuservico, string nome)
+        //{
+        //    return meuservico.Saudacao(nome);
+        //}
     }
 }
