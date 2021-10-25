@@ -2,11 +2,13 @@
 using APICatalogo.DTOs;
 using APICatalogo.Filters;
 using APICatalogo.Models;
+using APICatalogo.Pagination;
 using APICatalogo.Repository.Interfaces;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -36,9 +38,27 @@ namespace APICatalogo.Controllers
 
         [HttpGet]
         //[ServiceFilter(typeof(ApiLoggingFilter))]
-        public ActionResult<IEnumerable<ProdutoDTO>> Get()
+        public ActionResult<IEnumerable<ProdutoDTO>> Get([FromQuery] ProdutosParameters produtosParameters)
         {
-            return _mapper.Map<List<ProdutoDTO>>(_uow.ProdutoRepository.Get().AsNoTracking().ToList());
+            var produtos = _uow.ProdutoRepository.GetProdutos(produtosParameters);
+
+            //informações para se incluir no header do HTTP response;
+            var metadata = new
+            {
+                produtos.TotalCount,
+                produtos.PageSize,
+                produtos.CurrentPage,
+                produtos.TotalPages,
+                produtos.NasNext,
+                produtos.HasPrevious
+            };
+
+            //Inclui dados no Header do Http Response
+            Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(metadata));
+
+            var produtosDto = _mapper.Map<List<ProdutoDTO>>(produtos);
+
+            return produtosDto;
         }
 
         [HttpGet("{id:int}", Name = "ObterProduto")]
@@ -65,11 +85,14 @@ namespace APICatalogo.Controllers
             //NÃO É NECESSÁRIO VERIRICAR SE MODELSTATE É VÁLIDO POR CONTA DO ATTRIBUTE [ApiController]")]
             //if (!ModelState.IsValid)
             //    return BadRequest(ModelState);
+            var produto = _mapper.Map<Produto>(produtoDto);
 
-            _uow.ProdutoRepository.Add(_mapper.Map<Produto>(produtoDto));
+            _uow.ProdutoRepository.Add(produto);
             _uow.Commit();
 
-            return new CreatedAtRouteResult("ObterProduto", new { id = produtoDto.ProdutoId }, produtoDto);
+            var produtoDTO = _mapper.Map<ProdutoDTO>(produto);
+
+            return new CreatedAtRouteResult("ObterProduto", new { id = produtoDTO.ProdutoId }, produtoDTO);
         }
 
         [HttpPut("{id:int}")]

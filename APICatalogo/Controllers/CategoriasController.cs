@@ -1,12 +1,16 @@
 ﻿using APICatalogo.Context;
+using APICatalogo.DTOs;
 using APICatalogo.Models;
+using APICatalogo.Pagination;
 using APICatalogo.Repository.Interfaces;
 using APICatalogo.Servicos.Interfaces;
+using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,12 +26,14 @@ namespace APICatalogo.Controllers
         private readonly IUnitOfWork _uow;
         private readonly IConfiguration _configuration;
         private readonly ILogger _logger;
+        private readonly IMapper _mapper;
 
-        public CategoriasController(IUnitOfWork uow, IConfiguration config, ILogger<CategoriasController> logger)
+        public CategoriasController(IUnitOfWork uow, IConfiguration config, ILogger<CategoriasController> logger, IMapper mapper)
         {
             _uow = uow;
             _configuration = config;
             _logger = logger;
+            _mapper = mapper;
         }
 
         [HttpGet("autor")]
@@ -47,11 +53,28 @@ namespace APICatalogo.Controllers
         }
 
         [HttpGet]
-        public ActionResult<IEnumerable<Categoria>> Get()
+        public ActionResult<IEnumerable<CategoriaDTO>> Get([FromQuery] CategoriasParameters categoriasParameters)
         {
             try
             {
-                return _uow.CategoriaRepository.Get().AsNoTracking().ToList();
+                var categorias = _uow.CategoriaRepository.GetCategorias(categoriasParameters);
+
+                var metadata = new
+                {
+                    categorias.TotalCount,
+                    categorias.PageSize,
+                    categorias.CurrentPage,
+                    categorias.TotalPages,
+                    categorias.NasNext,
+                    categorias.HasPrevious
+                };
+
+                //Inclui dados no Header do Http Response
+                Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(metadata));
+
+                var categoriaDto = _mapper.Map<List<CategoriaDTO>>(categorias);
+
+                return categoriaDto;
             }
             catch
             {
@@ -60,13 +83,14 @@ namespace APICatalogo.Controllers
         }
 
         [HttpGet("produtos")]
-        public ActionResult<IEnumerable<Categoria>> GetCategoriasProdutos()
+        public ActionResult<IEnumerable<CategoriaDTO>> GetCategoriasProdutos()
         {
             try
             {
-                _logger.LogInformation(" ============== GET api/categorias/produtos ============== ");
+                //_logger.LogInformation(" ============== GET api/categorias/produtos ============== ");
+                var categoriasProdutoes = _uow.CategoriaRepository.GetCategoriaProdutos().ToList();
 
-                return _uow.CategoriaRepository.GetCategoriaProdutos().ToList();
+                return _mapper.Map<List<CategoriaDTO>>(categoriasProdutoes);
             }
             catch (Exception)
             {
@@ -76,21 +100,21 @@ namespace APICatalogo.Controllers
 
         //api/categorias/[numero inteiro > 0]
         [HttpGet("{id:int:min(1)}", Name = "ObterCategoria")] //min(1) - estipula um ID mínimo igual a 1
-        public ActionResult<Categoria> Get(int id)
+        public ActionResult<CategoriaDTO> Get(int id)
         {
             try
             {
-                _logger.LogInformation($" ============== GET api/categorias/produtos/{id} ============== ");
+                //_logger.LogInformation($" ============== GET api/categorias/produtos/{id} ============== ");
 
                 var categoria = _uow.CategoriaRepository.GetById(x => x.Id == id);
 
                 if (categoria == null)
                 {
-                    _logger.LogInformation($" ============== GET api/categorias/produtos/{id} NOT FOUND ============== ");
+                   //_logger.LogInformation($" ============== GET api/categorias/produtos/{id} NOT FOUND ============== ");
                     return NotFound($"Categoria com ID {id} não foi encontrada!");
                 }
 
-                return categoria;
+                return _mapper.Map<CategoriaDTO>(categoria);
             }
             catch (Exception)
             {
@@ -99,11 +123,11 @@ namespace APICatalogo.Controllers
         }
 
         [HttpGet("/primeiro")] // A barra(/) ignora a rota estabelecida no atributo [Route] decorando a classe
-        public ActionResult<Categoria> GetPrimeiro()
+        public ActionResult<CategoriaDTO> GetPrimeiro()
         {
             try
             {
-                return _uow.CategoriaRepository.Get().FirstOrDefault();
+                return _mapper.Map<CategoriaDTO>(_uow.CategoriaRepository.Get().FirstOrDefault());
             }
             catch
             {
@@ -112,14 +136,14 @@ namespace APICatalogo.Controllers
         }
 
         [HttpPost]
-        public ActionResult Post([FromBody] Categoria categoria)
+        public ActionResult Post([FromBody] CategoriaDTO categoriaDto)
         {
             try
             {
-                _uow.CategoriaRepository.Add(categoria);
+                _uow.CategoriaRepository.Add(_mapper.Map<Categoria>(categoriaDto));
                 _uow.Commit();
 
-                return new CreatedAtRouteResult("ObterCategoria", new { id = categoria.Id }, categoria);
+                return new CreatedAtRouteResult("ObterCategoria", new { id = categoriaDto.CategoriaId }, categoriaDto);
             }
             catch (Exception)
             {
@@ -128,14 +152,14 @@ namespace APICatalogo.Controllers
         }
 
         [HttpPut("{id:int}")]
-        public ActionResult Put(int id, [FromBody] Categoria categoria)
+        public ActionResult Put(int id, [FromBody] CategoriaDTO categoriaDto)
         {
             try
             {
-                if (id != categoria.Id)
+                if (id != categoriaDto.CategoriaId)
                     return BadRequest($"Não foi possível atualizar a categoria com ID {id}");
 
-                _uow.CategoriaRepository.Update(categoria);
+                _uow.CategoriaRepository.Update(_mapper.Map<Categoria>(categoriaDto));
                 _uow.Commit();
 
                 var categoriaAlt = _uow.CategoriaRepository.GetById(x => x.Id == id);
@@ -149,7 +173,7 @@ namespace APICatalogo.Controllers
         }
 
         [HttpDelete("{id:int}")]
-        public ActionResult<Categoria> Delete(int id)
+        public ActionResult<CategoriaDTO> Delete(int id)
         {
             try
             {
@@ -161,7 +185,7 @@ namespace APICatalogo.Controllers
                 _uow.CategoriaRepository.Delete(categoria);
                 _uow.Commit();
 
-                return categoria;
+                return _mapper.Map<CategoriaDTO>(categoria);
             }
             catch (Exception)
             {

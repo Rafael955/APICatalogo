@@ -1,6 +1,8 @@
 ﻿using APICatalogo.Context;
 using APICatalogo.Models;
+using APICatalogo.Pagination;
 using APICatalogo.Repository.Interfaces;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,6 +15,14 @@ namespace APICatalogo.Repository
         public ProdutoRepository(ApplicationDbContext context) : base(context)
         {
 
+        }
+
+        public PagedList<Produto> GetProdutos(ProdutosParameters produtosParameters)
+        {
+            return PagedList<Produto>.ToPagedList(Get()
+                .OrderBy(x => x.Nome),
+                produtosParameters.PageNumber,
+                produtosParameters.PageSize);
         }
 
         public IEnumerable<Produto> GetProdutosPorPreco()
