@@ -8,18 +8,22 @@ using APICatalogo.Repository.Interfaces;
 using APICatalogo.Servicos;
 using APICatalogo.Servicos.Interfaces;
 using AutoMapper;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace APICatalogo
@@ -52,6 +56,29 @@ namespace APICatalogo
 
             services.AddScoped<ApiLoggingFilter>();
             services.AddTransient<IMeuServico, MeuServico>();
+
+            services.AddIdentity<IdentityUser, IdentityRole>()
+                .AddEntityFrameworkStores<ApplicationDbContext>()
+                .AddDefaultTokenProviders();
+
+            //JWT
+            //adiciona o manipulador de autenticação e define o
+            //esquema de autenticação usado : Bearer
+            //valida o emissor, a audiencia e a chave
+            //usando a chave secreta valida a assinatura
+            //Microsoft.AspNetCore.Authentication.JwtBearer - middleware que permite uma aplicação receber um OpenID Connect bearer token
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(options =>
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = true,
+                        ValidateAudience = true,
+                        ValidateLifetime = true,
+                        ValidAudience = Configuration["TokenConfiguration:Audience"],
+                        ValidIssuer = Configuration["TokenConfiguration:Issuer"],
+                        ValidateIssuerSigningKey = true,
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["Jwt:Key"]))
+                    });
 
             services.AddControllers()
                 .AddNewtonsoftJson(options =>
@@ -86,8 +113,10 @@ namespace APICatalogo
             //adiciona o middleware de roteamento
             app.UseRouting();
 
+            //adiciona o middleware de autenticação
             app.UseAuthentication();
 
+            //adiciona o middleware de autorização(este deve vir sempre após o de autenticação).
             app.UseAuthorization();
 
             //Adiciona o middleware que executa o endpoint do request atual
