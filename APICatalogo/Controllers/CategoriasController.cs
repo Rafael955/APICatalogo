@@ -5,6 +5,7 @@ using APICatalogo.Pagination;
 using APICatalogo.Repository.Interfaces;
 using APICatalogo.Servicos.Interfaces;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -18,6 +19,7 @@ using System.Threading.Tasks;
 
 namespace APICatalogo.Controllers
 {
+    [Authorize(AuthenticationSchemes = "Bearer")]
     [Route("api/[controller]")]
     [ApiController]
     public class CategoriasController : ControllerBase

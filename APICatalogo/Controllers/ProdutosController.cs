@@ -5,6 +5,7 @@ using APICatalogo.Models;
 using APICatalogo.Pagination;
 using APICatalogo.Repository.Interfaces;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
@@ -16,6 +17,7 @@ using System.Threading.Tasks;
 
 namespace APICatalogo.Controllers
 {
+    [Authorize(AuthenticationSchemes = "Bearer")]
     [Route("api/[controller]")]
     [ApiController]
     public class ProdutosController : ControllerBase
