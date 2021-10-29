@@ -6,6 +6,7 @@ using APICatalogo.Pagination;
 using APICatalogo.Repository.Interfaces;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
@@ -17,7 +18,7 @@ using System.Threading.Tasks;
 
 namespace APICatalogo.Controllers
 {
-    [Authorize(AuthenticationSchemes = "Bearer")]
+    //[Authorize(AuthenticationSchemes = "Bearer")]
     [Route("api/[controller]")]
     [ApiController]
     public class ProdutosController : ControllerBase
@@ -38,8 +39,8 @@ namespace APICatalogo.Controllers
             return _mapper.Map<List<ProdutoDTO>>(await _uow.ProdutoRepository.GetProdutosPorPreco());
         }
 
-        [HttpGet]
         //[ServiceFilter(typeof(ApiLoggingFilter))]
+        [HttpGet]
         public async Task<ActionResult<IEnumerable<ProdutoDTO>>> Get([FromQuery] ProdutosParameters produtosParameters)
         {
             var produtos = await _uow.ProdutoRepository.GetProdutos(produtosParameters);
@@ -64,6 +65,7 @@ namespace APICatalogo.Controllers
         }
 
         [HttpGet("{id:int}", Name = "ObterProduto")]
+        [EnableCors("PermitirApiRequest")]
         public async Task<ActionResult<ProdutoDTO>> Get(int id)
         {
             ////throw new Exception("Exception ao retornar produto pelo id!");

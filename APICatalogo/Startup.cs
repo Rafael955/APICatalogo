@@ -40,6 +40,15 @@ namespace APICatalogo
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddCors(options =>
+            {
+                options.AddPolicy("PermitirApiRequest",
+                    builder => builder.WithOrigins("https://apirequest.io").WithMethods("GET")
+                    );
+                //options.AddPolicy("TudoLiberado",
+                    //builder => builder.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin());
+            });
+
             var mappingConfig = new MapperConfiguration(x =>
             {
                 x.AddProfile(new MappingProfile());
@@ -118,6 +127,13 @@ namespace APICatalogo
 
             //adiciona o middleware de autorização(este deve vir sempre após o de autenticação).
             app.UseAuthorization();
+
+            //app.UseCors(opt => opt
+            //    .WithOrigins("https://apirequest.io")
+            //    .WithMethods("GET")
+            //    );
+
+            app.UseCors();
 
             //Adiciona o middleware que executa o endpoint do request atual
             app.UseEndpoints(endpoints =>

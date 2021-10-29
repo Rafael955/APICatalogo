@@ -6,6 +6,7 @@ using APICatalogo.Repository.Interfaces;
 using APICatalogo.Servicos.Interfaces;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -19,9 +20,10 @@ using System.Threading.Tasks;
 
 namespace APICatalogo.Controllers
 {
-    [Authorize(AuthenticationSchemes = "Bearer")]
+    //[Authorize(AuthenticationSchemes = "Bearer")]
     [Route("api/[controller]")]
     [ApiController]
+    //[EnableCors("TudoLiberado")]
     public class CategoriasController : ControllerBase
     {
         //private readonly ApplicationDbContext _uow;
@@ -86,6 +88,7 @@ namespace APICatalogo.Controllers
 
         //api/categorias/[numero inteiro > 0]
         [HttpGet("{id:int:min(1)}", Name = "ObterCategoria")] //min(1) - estipula um ID mínimo igual a 1
+        [EnableCors("PermitirApiRequest")]
         public async Task<ActionResult<CategoriaDTO>> Get(int id)
         {
             try
