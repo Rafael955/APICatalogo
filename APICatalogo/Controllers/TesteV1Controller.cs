@@ -2,9 +2,9 @@
 
 namespace APICatalogo.Controllers
 {
-    [ApiVersion("1.0", Deprecated = true)]
+    //[ApiVersion("1.0", Deprecated = true)]
     //[Route("api/v{v:apiVersion}/teste")] com o options.ApiVersionReader passar a versão pela url não é mais necessária.
-    [Route("api/teste")]
+    //[Route("api/teste")]
     [ApiController]
     public class TesteV1Controller : ControllerBase
     {

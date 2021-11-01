@@ -2,9 +2,9 @@
 
 namespace APICatalogo.Controllers
 {
-    [ApiVersion("2.0")]
+    //[ApiVersion("2.0")]
     //[Route("api/v{v:apiVersion}/teste")] com o options.ApiVersionReader passar a versão pela url não é mais necessária.
-    [Route("api/teste")]
+    //[Route("api/teste")]
     [ApiController]
     public class TesteV2Controller : ControllerBase
     {

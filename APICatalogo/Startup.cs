@@ -21,6 +21,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -90,20 +91,43 @@ namespace APICatalogo
                         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["Jwt:Key"]))
                     });
 
+            //Swagger
+            services.AddSwaggerGen(c => 
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo
+                {
+                    Version = "v1",
+                    Title = "APICatalogo",
+                    Description = "Catálogo de Produtos e Categorias",
+                    TermsOfService = new Uri("https://siterafael.com/termos"),
+                    Contact = new OpenApiContact
+                    {
+                        Name = "rafael ferreira",
+                        Email = "rafael@yahoo.com",
+                        Url = new Uri("https://siterafael.com/termos")
+                    },
+                    License = new OpenApiLicense
+                    {
+                        Name = "Usar sobre LICX",
+                        Url = new Uri("https://siterafael.com/licensa")
+                    }
+                });
+            });
+
             services.AddControllers()
                 .AddNewtonsoftJson(options =>
                 {
                     options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
                 });
 
-            //Versionamento da API
-            services.AddApiVersioning(options => 
-            {
-                options.AssumeDefaultVersionWhenUnspecified = true;
-                options.DefaultApiVersion = new ApiVersion(1, 0);
-                options.ReportApiVersions = true;
-                options.ApiVersionReader = new HeaderApiVersionReader("x-api-version"); //passa a versão da api pelo header da requisição!
-            });
+            //Versionamento da API nativo
+            //services.AddApiVersioning(options => 
+            //{
+            //    options.AssumeDefaultVersionWhenUnspecified = true;
+            //    options.DefaultApiVersion = new ApiVersion(1, 0);
+            //    options.ReportApiVersions = true;
+            //    options.ApiVersionReader = new HeaderApiVersionReader("x-api-version"); //passa a versão da api pelo header da requisição!
+            //});
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -138,12 +162,23 @@ namespace APICatalogo
             //adiciona o middleware de autorização(este deve vir sempre após o de autenticação).
             app.UseAuthorization();
 
-            //app.UseCors(opt => opt
-            //    .WithOrigins("https://apirequest.io")
-            //    .WithMethods("GET")
-            //    );
+            app.UseCors(opt => opt
+                .WithOrigins("https://apirequest.io")
+                .WithMethods("GET")
+                );
 
-            app.UseCors();
+            //app.UseCors();
+
+            //Habilira o middleware para servir o Swagger 
+            //gerado como um endpoint  JSON  
+            app.UseSwagger();
+
+            //SwaggerUI
+            app.UseSwaggerUI(c => 
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", 
+                    "Catálogo de Produtos e Categoria");
+            });
 
             //Adiciona o middleware que executa o endpoint do request atual
             app.UseEndpoints(endpoints =>
