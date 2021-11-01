@@ -33,6 +33,11 @@ namespace APICatalogo.Controllers
             _mapper = mapper;
         }
 
+        /// <summary>
+        /// Obtém os produtos ordenados por preço na ordem ascendente
+        /// </summary>
+        /// <param name="none"></param>
+        /// <returns>Lista de objetos Produtos ordenados por preço</returns>
         [HttpGet("menor-preco")]
         public async Task<ActionResult<IEnumerable<ProdutoDTO>>> GetProdutosPrecos()
         {
@@ -40,6 +45,11 @@ namespace APICatalogo.Controllers
         }
 
         //[ServiceFilter(typeof(ApiLoggingFilter))]
+        /// <summary>
+        /// Exibe uma relação dos produtos
+        /// </summary>
+        /// <returns>Retorna uma lista de objetos Produto</returns>
+        // api/produtos
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ProdutoDTO>>> Get([FromQuery] ProdutosParameters produtosParameters)
         {
@@ -64,6 +74,11 @@ namespace APICatalogo.Controllers
             return produtosDto;
         }
 
+        /// <summary>
+        /// Obtem o produto pelo seu identificado produtoId
+        /// </summary>
+        /// <param name="id">Código do produto</param>
+        /// <returns>Um objeto Produto</returns>
         [HttpGet("{id:int}", Name = "ObterProduto")]
         [EnableCors("PermitirApiRequest")]
         public async Task<ActionResult<ProdutoDTO>> Get(int id)
@@ -83,6 +98,11 @@ namespace APICatalogo.Controllers
             return _mapper.Map<ProdutoDTO>(produto);
         }
 
+        /// <summary>
+        /// Incluir um novo produto
+        /// </summary>
+        /// <param name="produtoDto"></param>
+        /// <returns></returns>
         [HttpPost]
         public async Task<ActionResult> Post([FromBody] ProdutoDTO produtoDto)
         {

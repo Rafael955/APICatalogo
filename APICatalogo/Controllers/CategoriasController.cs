@@ -32,6 +32,11 @@ namespace APICatalogo.Controllers
         private readonly ILogger _logger;
         private readonly IMapper _mapper;
 
+        /// <summary>
+        /// Construtor do controlador CategoriasController
+        /// </summary>
+        /// <param name="contexto"></param>
+        /// <param name="mapper"></param>
         public CategoriasController(IUnitOfWork uow, IConfiguration config, ILogger<CategoriasController> logger, IMapper mapper)
         {
             _uow = uow;
@@ -40,6 +45,10 @@ namespace APICatalogo.Controllers
             _mapper = mapper;
         }
 
+        /// <summary>
+        /// Obtém os produtos relacionados para cada categoria
+        /// </summary>
+        /// <returns>Objetos Categoria e respectivo Objetos Produtos</returns>
         [HttpGet("produtos")]
         public async Task<ActionResult<IEnumerable<CategoriaDTO>>> GetCategoriasProdutos()
         {
@@ -56,6 +65,10 @@ namespace APICatalogo.Controllers
             }
         }
 
+        /// <summary>
+        /// Retorna uma coleção de objetos Categoria
+        /// </summary>
+        /// <returns>Lista de Categorias</returns>
         [HttpGet]
         public async Task<ActionResult<IEnumerable<CategoriaDTO>>> Get([FromQuery] CategoriasParameters categoriasParameters)
         {
@@ -87,6 +100,11 @@ namespace APICatalogo.Controllers
         }
 
         //api/categorias/[numero inteiro > 0]
+        /// <summary>
+        /// Obtem uma Categoria pelo seu Id
+        /// </summary>
+        /// <param name="id">código da categoria</param>
+        /// <returns>Objetos Categoria</returns>
         [HttpGet("{id:int:min(1)}", Name = "ObterCategoria")] //min(1) - estipula um ID mínimo igual a 1
         [EnableCors("PermitirApiRequest")]
         public async Task<ActionResult<CategoriaDTO>> Get(int id)
@@ -110,6 +128,22 @@ namespace APICatalogo.Controllers
             }
         }
 
+        /// <summary>
+        /// Inclui uma nova categoria
+        /// </summary>
+        /// <remarks>
+        /// Exemplo de request:
+        /// 
+        ///     POST api/categorias
+        ///     {
+        ///         "categoriaId": 1,
+        ///         "nome": "categoria1",
+        ///         "imagemUrl": "http://teste.net/1.jpg"
+        ///     }
+        /// </remarks>
+        /// <param name="categoriaDto">objeto Categoria</param>
+        /// <returns>O objeto Categoria incluida</returns>
+        /// <remarks>Retorna um objeto Catgegoria incluído</remarks>
         [HttpPost]
         public async Task<ActionResult> Post([FromBody] CategoriaDTO categoriaDto)
         {
@@ -126,6 +160,12 @@ namespace APICatalogo.Controllers
             }
         }
 
+        /// <summary>
+        /// Altera uma Categoria 
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="categoriaDto"></param>
+        /// <returns>retorna 400 ou 200</returns>
         [HttpPut("{id:int}")]
         public async Task<ActionResult> Put(int id, [FromBody] CategoriaDTO categoriaDto)
         {
@@ -147,6 +187,11 @@ namespace APICatalogo.Controllers
             }
         }
 
+        /// <summary>
+        /// Deleta uma Categoria
+        /// </summary>
+        /// <param name="id">codigo da categoria (int) </param>
+        /// <returns></returns>
         [HttpDelete("{id:int}")]
         public async Task<ActionResult<CategoriaDTO>> Delete(int id)
         {
