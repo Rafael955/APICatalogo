@@ -21,6 +21,7 @@ using System.Threading.Tasks;
 namespace APICatalogo.Controllers
 {
     //[Authorize(AuthenticationSchemes = "Bearer")]
+    [Produces("application/json")]
     [Route("api/[controller]")]
     [ApiController]
     //[EnableCors("TudoLiberado")]
@@ -28,20 +29,22 @@ namespace APICatalogo.Controllers
     {
         //private readonly ApplicationDbContext _uow;
         private readonly IUnitOfWork _uow;
-        private readonly IConfiguration _configuration;
-        private readonly ILogger _logger;
+        //private readonly IConfiguration _configuration;
+        //private readonly ILogger _logger;
         private readonly IMapper _mapper;
 
         /// <summary>
         /// Construtor do controlador CategoriasController
         /// </summary>
-        /// <param name="contexto"></param>
+        /// <param name="uow"></param>
+        /// <param name="config"></param>
+        /// <param name="logger"></param>
         /// <param name="mapper"></param>
         public CategoriasController(IUnitOfWork uow, IConfiguration config, ILogger<CategoriasController> logger, IMapper mapper)
         {
             _uow = uow;
-            _configuration = config;
-            _logger = logger;
+            //_configuration = config;
+            //_logger = logger;
             _mapper = mapper;
         }
 

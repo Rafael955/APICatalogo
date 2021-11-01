@@ -19,6 +19,7 @@ using System.Threading.Tasks;
 namespace APICatalogo.Controllers
 {
     //[Authorize(AuthenticationSchemes = "Bearer")]
+    [Produces("application/json")]
     [Route("api/[controller]")]
     [ApiController]
     public class ProdutosController : ControllerBase

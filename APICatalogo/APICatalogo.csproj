@@ -4,6 +4,15 @@
     <TargetFramework>net5.0</TargetFramework>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);1591</NoWarn> <!--Remove os alertas dos códigos que não possuem comentários da documentação-->
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DocumentationFile>F:\Cursos\Macoratti\Curso Web API .NET Core Essencial\projeto\APICatalogo\APICatalogo\APICatalogo.xml</DocumentationFile>
+  </PropertyGroup>
+
   <ItemGroup>
     <Compile Remove="Controllers\TesteV1Controller.cs" />
     <Compile Remove="Controllers\TesteV2Controller.cs" />
