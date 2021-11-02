@@ -1,0 +1,21 @@
+Notas:
+
+
+Atributo [ApiController] verifica automaticamente se uma ModelState está valida, logo não precisa mais definir esta verificação dentro dos métodos.
+Ex: 
+if (!ModelState.IsValid)  <-- (Não é necessário caso use [ApiController])
+   return BadRequest(ModelState);
+
+Find x GetById
+
+var produto = await _uow.ProdutoRepository.GetById(x => x.Id == id); //Obs: Vantagem do método Find, ele busca primeiro em memória, se não achar ele vai até o banco de dados, FirstOrDefault vai direto ao banco.
+
+Atributo ApiConventionMethod: Define todos os response types referentes ao tipo de requisição pois leva em conta a convenção de possíveis status de retorno de uma determinada requisição http 
+Ex: 
+    [ApiConventionMethod(typeof(DefaultApiConventions), nameof(DefaultApiConventions.Put))], é o mesmo que:
+    
+    [ProducesResponseType]
+    [ProducesResponseType(StatusCode.Status204NoContent)]
+    [ProducesResponseType(StatusCode.Status404NotFound)]
+    [ProducesResponseType(StatusCode.Status400BadRequest)]
+    

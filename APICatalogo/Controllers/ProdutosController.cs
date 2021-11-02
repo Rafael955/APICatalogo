@@ -7,6 +7,7 @@ using APICatalogo.Repository.Interfaces;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
@@ -19,6 +20,7 @@ using System.Threading.Tasks;
 namespace APICatalogo.Controllers
 {
     //[Authorize(AuthenticationSchemes = "Bearer")]
+    [ApiConventionType(typeof(DefaultApiConventions))]
     [Produces("application/json")]
     [Route("api/[controller]")]
     [ApiController]
@@ -37,7 +39,6 @@ namespace APICatalogo.Controllers
         /// <summary>
         /// Obtém os produtos ordenados por preço na ordem ascendente
         /// </summary>
-        /// <param name="none"></param>
         /// <returns>Lista de objetos Produtos ordenados por preço</returns>
         [HttpGet("menor-preco")]
         public async Task<ActionResult<IEnumerable<ProdutoDTO>>> GetProdutosPrecos()
@@ -76,21 +77,16 @@ namespace APICatalogo.Controllers
         }
 
         /// <summary>
-        /// Obtem o produto pelo seu identificado produtoId
+        /// Obtem o produto pelo seu identificador produtoId
         /// </summary>
         /// <param name="id">Código do produto</param>
         /// <returns>Um objeto Produto</returns>
+        //[ProducesResponseType(typeof(ProdutoDTO), StatusCodes.Status200OK)]
+        //[ProducesResponseType(StatusCodes.Status404NotFound)]
         [HttpGet("{id:int}", Name = "ObterProduto")]
         [EnableCors("PermitirApiRequest")]
         public async Task<ActionResult<ProdutoDTO>> Get(int id)
         {
-            ////throw new Exception("Exception ao retornar produto pelo id!");
-            //string[] teste = null;
-            //if(teste.Length > 0)
-            //{
-
-            //}
-
             var produto = await _uow.ProdutoRepository.GetById(x => x.Id == id);
 
             if (produto == null)
@@ -100,16 +96,16 @@ namespace APICatalogo.Controllers
         }
 
         /// <summary>
-        /// Incluir um novo produto
+        /// Inclui um novo produto
         /// </summary>
-        /// <param name="produtoDto"></param>
-        /// <returns></returns>
+        /// <param name="produtoDto">objeto Produto</param>
+        /// <returns>O objeto Produto incluido</returns>
+        /// <remarks>Retorna um objeto Produto incluído</remarks>
+        //[ProducesResponseType(StatusCodes.Status201Created)]
+        //[ProducesResponseType(StatusCodes.Status400BadRequest)]
         [HttpPost]
         public async Task<ActionResult> Post([FromBody] ProdutoDTO produtoDto)
         {
-            //NÃO É NECESSÁRIO VERIRICAR SE MODELSTATE É VÁLIDO POR CONTA DO ATTRIBUTE [ApiController]")]
-            //if (!ModelState.IsValid)
-            //    return BadRequest(ModelState);
             var produto = _mapper.Map<Produto>(produtoDto);
 
             _uow.ProdutoRepository.Add(produto);
@@ -120,39 +116,35 @@ namespace APICatalogo.Controllers
             return new CreatedAtRouteResult("ObterProduto", new { id = produtoDTO.ProdutoId }, produtoDTO);
         }
 
+        /// <summary>
+        /// Atualiza um produto pelo seu identificador produtoId
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="produtoDto"></param>
+        /// <returns></returns>
         [HttpPut("{id:int}")]
+        //[ApiConventionMethod(typeof(DefaultApiConventions), nameof(DefaultApiConventions.Put))]
         public async Task<ActionResult> Put(int id, [FromBody] ProdutoDTO produtoDto)
         {
-            //if (!ModelState.IsValid)
-            //    return BadRequest(ModelState);
-
             if (id != produtoDto.ProdutoId)
                 return BadRequest();
-            //Minha versão
-            //var _produto = _uow.Produtos.Find(id);
 
-            //_produto.Descricao = produto.Descricao;
-            //_produto.ImagemUrl = produto.ImagemUrl;
-            //_produto.Nome = produto.Nome;
-            //_produto.Preco = produto.Preco;
-            //_produto.Estoque = produto.Estoque;
-            //_produto.CategoriaId = produto.CategoriaId;
-
-            //_uow.Produtos.Update(_produto);
-            //_uow.SaveChanges();
-
-            //Versão do professor
             _uow.ProdutoRepository.Update(_mapper.Map<Produto>(produtoDto));
             await _uow.Commit();
 
             return Ok();
         }
 
+        /// <summary>
+        /// Remove um produto pelo seu identificador produtoId
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpDelete("{id:int}")]
+        //[ApiConventionMethod(typeof(DefaultApiConventions), nameof(DefaultApiConventions.Delete))]
         public async Task<ActionResult<ProdutoDTO>> Delete(int id)
         {
-            //var produto = _uow.Produtos.FirstOrDefault(x => x.Id == id);
-            var produto = await _uow.ProdutoRepository.GetById(x => x.Id == id); //Obs: Vantagem do método Find, ele busca primeiro em memória, se não achar ele vai até o banco de dados, FirstOrDefault vai direto ao banco.
+            var produto = await _uow.ProdutoRepository.GetById(x => x.Id == id);
 
             if (produto == null)
                 return NotFound();

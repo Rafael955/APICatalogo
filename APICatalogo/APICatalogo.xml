@@ -84,7 +84,6 @@
             <summary>
             Obtém os produtos ordenados por preço na ordem ascendente
             </summary>
-            <param name="none"></param>
             <returns>Lista de objetos Produtos ordenados por preço</returns>
         </member>
         <member name="M:APICatalogo.Controllers.ProdutosController.Get(APICatalogo.Pagination.ProdutosParameters)">
@@ -95,16 +94,32 @@
         </member>
         <member name="M:APICatalogo.Controllers.ProdutosController.Get(System.Int32)">
             <summary>
-            Obtem o produto pelo seu identificado produtoId
+            Obtem o produto pelo seu identificador produtoId
             </summary>
             <param name="id">Código do produto</param>
             <returns>Um objeto Produto</returns>
         </member>
         <member name="M:APICatalogo.Controllers.ProdutosController.Post(APICatalogo.DTOs.ProdutoDTO)">
             <summary>
-            Incluir um novo produto
+            Inclui um novo produto
             </summary>
+            <param name="produtoDto">objeto Produto</param>
+            <returns>O objeto Produto incluido</returns>
+            <remarks>Retorna um objeto Produto incluído</remarks>
+        </member>
+        <member name="M:APICatalogo.Controllers.ProdutosController.Put(System.Int32,APICatalogo.DTOs.ProdutoDTO)">
+            <summary>
+            Atualiza um produto pelo seu identificador produtoId
+            </summary>
+            <param name="id"></param>
             <param name="produtoDto"></param>
+            <returns></returns>
+        </member>
+        <member name="M:APICatalogo.Controllers.ProdutosController.Delete(System.Int32)">
+            <summary>
+            Remove um produto pelo seu identificador produtoId
+            </summary>
+            <param name="id"></param>
             <returns></returns>
         </member>
         <member name="T:APICatalogo.Logging.CustomLoggerProvider">
