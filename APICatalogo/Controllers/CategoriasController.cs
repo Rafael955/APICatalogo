@@ -20,7 +20,8 @@ using System.Threading.Tasks;
 
 namespace APICatalogo.Controllers
 {
-    //[Authorize(AuthenticationSchemes = "Bearer")]
+    [Authorize(AuthenticationSchemes = "Bearer")]
+    [ApiConventionType(typeof(DefaultApiConventions))]
     [Produces("application/json")]
     [Route("api/[controller]")]
     [ApiController]
@@ -108,10 +109,10 @@ namespace APICatalogo.Controllers
         /// </summary>
         /// <param name="id">código da categoria</param>
         /// <returns>Objetos Categoria</returns>
+        //[ProducesResponseType(typeof(CategoriaDTO), StatusCodes.Status200OK)]
+        //[ProducesResponseType(StatusCodes.Status404NotFound)]
         [HttpGet("{id:int:min(1)}", Name = "ObterCategoria")] //min(1) - estipula um ID mínimo igual a 1
         [EnableCors("PermitirApiRequest")]
-        [ProducesResponseType(typeof(CategoriaDTO), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<CategoriaDTO>> Get(int id)
         {
             try
@@ -149,9 +150,9 @@ namespace APICatalogo.Controllers
         /// <param name="categoriaDto">objeto Categoria</param>
         /// <returns>O objeto Categoria incluida</returns>
         /// <remarks>Retorna um objeto Catgegoria incluído</remarks>
+        //[ProducesResponseType(StatusCodes.Status201Created)]
+        //[ProducesResponseType(StatusCodes.Status400BadRequest)]
         [HttpPost]
-        [ProducesResponseType(StatusCodes.Status201Created)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult> Post([FromBody] CategoriaDTO categoriaDto)
         {
             try
@@ -173,8 +174,8 @@ namespace APICatalogo.Controllers
         /// <param name="id"></param>
         /// <param name="categoriaDto"></param>
         /// <returns>retorna 400 ou 200</returns>
+        //[ApiConventionMethod(typeof(DefaultApiConventions), nameof(DefaultApiConventions.Put))]
         [HttpPut("{id:int}")]
-        [ApiConventionMethod(typeof(DefaultApiConventions), nameof(DefaultApiConventions.Put))]
         public async Task<ActionResult> Put(int id, [FromBody] CategoriaDTO categoriaDto)
         {
             try
@@ -200,8 +201,8 @@ namespace APICatalogo.Controllers
         /// </summary>
         /// <param name="id">codigo da categoria (int) </param>
         /// <returns></returns>
+        //[ApiConventionMethod(typeof(DefaultApiConventions), nameof(DefaultApiConventions.Delete))]
         [HttpDelete("{id:int}")]
-        [ApiConventionMethod(typeof(DefaultApiConventions), nameof(DefaultApiConventions.Delete))]
         public async Task<ActionResult<CategoriaDTO>> Delete(int id)
         {
             try

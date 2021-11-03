@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 namespace APICatalogo.Controllers
 {
     [Produces("application/json")]
+    [ApiConventionType(typeof(DefaultApiConventions))]
     [Route("api/[controller]")]
     [ApiController]
     public class AutorizaController : ControllerBase

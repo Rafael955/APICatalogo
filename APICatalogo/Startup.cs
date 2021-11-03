@@ -49,7 +49,7 @@ namespace APICatalogo
                     builder => builder.WithOrigins("https://apirequest.io").WithMethods("GET")
                     );
                 //options.AddPolicy("TudoLiberado",
-                    //builder => builder.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin());
+                //builder => builder.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin());
             });
 
             var mappingConfig = new MapperConfiguration(x =>
@@ -93,7 +93,7 @@ namespace APICatalogo
                     });
 
             //Swagger
-            services.AddSwaggerGen(c => 
+            services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo
                 {
@@ -117,6 +117,35 @@ namespace APICatalogo
                 var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
                 var xmlPath = String.Concat(AppContext.BaseDirectory, xmlFile);
                 c.IncludeXmlComments(xmlPath);
+
+                c.AddSecurityDefinition(
+                    "Bearer",
+                    new OpenApiSecurityScheme
+                    {
+                        In = ParameterLocation.Header,
+                        Description = "Copiar 'bearer' + token",
+                        Name = "Authorization",
+                        Type = SecuritySchemeType.ApiKey,
+                        Scheme = "Bearer"
+                    });
+
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement()
+                {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id = "Bearer"
+                            },
+                            Scheme = "oauth2",
+                            Name = "Bearer",
+                            In = ParameterLocation.Header
+                        },
+                        new List<string>()
+                    },
+                });
             });
 
             services.AddControllers()
@@ -179,9 +208,9 @@ namespace APICatalogo
             app.UseSwagger();
 
             //SwaggerUI
-            app.UseSwaggerUI(c => 
+            app.UseSwaggerUI(c =>
             {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", 
+                c.SwaggerEndpoint("/swagger/v1/swagger.json",
                     "Catálogo de Produtos e Categoria");
             });
 
