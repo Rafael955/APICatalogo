@@ -41,7 +41,7 @@ namespace APICatalogo.Controllers
         /// <param name="config"></param>
         /// <param name="logger"></param>
         /// <param name="mapper"></param>
-        public CategoriasController(IUnitOfWork uow, IConfiguration config, ILogger<CategoriasController> logger, IMapper mapper)
+        public CategoriasController(IUnitOfWork uow, IMapper mapper)
         {
             _uow = uow;
             //_configuration = config;
@@ -74,34 +74,54 @@ namespace APICatalogo.Controllers
         /// </summary>
         /// <returns>Lista de Categorias</returns>
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<CategoriaDTO>>> Get([FromQuery] CategoriasParameters categoriasParameters)
+        public ActionResult<IEnumerable<CategoriaDTO>> Get()
         {
             try
             {
-                var categorias = await _uow.CategoriaRepository.GetCategorias(categoriasParameters);
-
-                var metadata = new
-                {
-                    categorias.TotalCount,
-                    categorias.PageSize,
-                    categorias.CurrentPage,
-                    categorias.TotalPages,
-                    categorias.NasNext,
-                    categorias.HasPrevious
-                };
-
-                //Inclui dados no Header do Http Response
-                Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(metadata));
-
-                var categoriaDto = _mapper.Map<List<CategoriaDTO>>(categorias);
-
-                return categoriaDto;
+                var categorias = _uow.CategoriaRepository.Get().ToList();
+                var categoriasDto = _mapper.Map<List<CategoriaDTO>>(categorias);
+                //throw new Exception();
+                return categoriasDto;
             }
-            catch
+            catch (Exception)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, "Erro ao tentar obter as categorias do banco de dados!");
+                return BadRequest();
             }
         }
+
+        /// <summary>
+        /// Retorna uma coleção de objetos Categoria
+        /// </summary>
+        /// <returns>Lista de Categorias</returns>
+        //[HttpGet]
+        //public async Task<ActionResult<IEnumerable<CategoriaDTO>>> Get([FromQuery] CategoriasParameters categoriasParameters)
+        //{
+        //    try
+        //    {
+        //        var categorias = await _uow.CategoriaRepository.GetCategorias(categoriasParameters);
+
+        //        var metadata = new
+        //        {
+        //            categorias.TotalCount,
+        //            categorias.PageSize,
+        //            categorias.CurrentPage,
+        //            categorias.TotalPages,
+        //            categorias.NasNext,
+        //            categorias.HasPrevious
+        //        };
+
+        //        //Inclui dados no Header do Http Response
+        //        Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(metadata));
+
+        //        var categoriaDto = _mapper.Map<List<CategoriaDTO>>(categorias);
+
+        //        return categoriaDto;
+        //    }
+        //    catch
+        //    {
+        //        return StatusCode(StatusCodes.Status500InternalServerError, "Erro ao tentar obter as categorias do banco de dados!");
+        //    }
+        //}
 
         //api/categorias/[numero inteiro > 0]
         /// <summary>
@@ -111,9 +131,10 @@ namespace APICatalogo.Controllers
         /// <returns>Objetos Categoria</returns>
         //[ProducesResponseType(typeof(CategoriaDTO), StatusCodes.Status200OK)]
         //[ProducesResponseType(StatusCodes.Status404NotFound)]
-        [HttpGet("{id:int:min(1)}", Name = "ObterCategoria")] //min(1) - estipula um ID mínimo igual a 1
+        //[HttpGet("{id:int:min(1)}", Name = "ObterCategoria")] //min(1) - estipula um ID mínimo igual a 1
+        [HttpGet("{id:int}", Name = "ObterCategoria")]
         [EnableCors("PermitirApiRequest")]
-        public async Task<ActionResult<CategoriaDTO>> Get(int id)
+        public async Task<ActionResult<CategoriaDTO>> Get(int? id)
         {
             try
             {
@@ -190,7 +211,7 @@ namespace APICatalogo.Controllers
 
                 return Ok(categoriaAlt);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, $"Não foi possível atualizar a categoria com ID {id}");
             }
