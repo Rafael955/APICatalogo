@@ -5,6 +5,7 @@ using APICatalogo.Pagination;
 using APICatalogo.Repository.Interfaces;
 using APICatalogo.Servicos.Interfaces;
 using AutoMapper;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
@@ -20,10 +21,11 @@ using System.Threading.Tasks;
 
 namespace APICatalogo.Controllers
 {
-    [Authorize(AuthenticationSchemes = "Bearer")]
+    //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [ApiConventionType(typeof(DefaultApiConventions))]
     [Produces("application/json")]
     [Route("api/[controller]")]
+    [EnableCors("PermitirApiRequest")]
     [ApiController]
     //[EnableCors("TudoLiberado")]
     public class CategoriasController : ControllerBase
@@ -47,6 +49,14 @@ namespace APICatalogo.Controllers
             //_configuration = config;
             //_logger = logger;
             _mapper = mapper;
+        }
+
+
+        [AllowAnonymous]
+        [HttpGet("teste")]
+        public ActionResult<string> GetTeste()
+        {
+            return $"CategoriasController :: Acessado em : {DateTime.Now.ToLongDateString()}";
         }
 
         /// <summary>
@@ -79,6 +89,29 @@ namespace APICatalogo.Controllers
             try
             {
                 var categorias = _uow.CategoriaRepository.Get().ToList();
+                var categoriasDto = _mapper.Map<List<CategoriaDTO>>(categorias);
+                //throw new Exception();
+                return categoriasDto;
+            }
+            catch (Exception)
+            {
+                return BadRequest();
+            }
+        }
+
+        [HttpGet("paginacao")]
+        public ActionResult<IEnumerable<CategoriaDTO>> GetPaginacao(int pag = 1, int reg = 5)
+        {
+            try
+            {
+                var categorias = _uow.CategoriaRepository.LocalizaPagina<Categoria>(pag, reg).ToList();
+
+                var totalDeRegistros = _uow.CategoriaRepository.GetTotalRegistros();
+                var numeroPaginas = ((int)Math.Ceiling((double)totalDeRegistros / reg));
+
+                Response.Headers["X-Total-Registros"] = totalDeRegistros.ToString();
+                Response.Headers["X-Numero-Paginas"] = numeroPaginas.ToString();
+
                 var categoriasDto = _mapper.Map<List<CategoriaDTO>>(categorias);
                 //throw new Exception();
                 return categoriasDto;
@@ -133,7 +166,6 @@ namespace APICatalogo.Controllers
         //[ProducesResponseType(StatusCodes.Status404NotFound)]
         //[HttpGet("{id:int:min(1)}", Name = "ObterCategoria")] //min(1) - estipula um ID mínimo igual a 1
         [HttpGet("{id:int}", Name = "ObterCategoria")]
-        [EnableCors("PermitirApiRequest")]
         public async Task<ActionResult<CategoriaDTO>> Get(int? id)
         {
             try
@@ -143,7 +175,7 @@ namespace APICatalogo.Controllers
 
                 if (categoria == null)
                 {
-                   //_logger.LogInformation($" ============== GET api/categorias/produtos/{id} NOT FOUND ============== ");
+                    //_logger.LogInformation($" ============== GET api/categorias/produtos/{id} NOT FOUND ============== ");
                     return NotFound($"Categoria com ID {id} não foi encontrada!");
                 }
 

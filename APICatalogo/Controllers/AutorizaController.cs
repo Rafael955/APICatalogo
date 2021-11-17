@@ -1,4 +1,6 @@
 ﻿using APICatalogo.DTOs;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -16,6 +18,7 @@ namespace APICatalogo.Controllers
     [Produces("application/json")]
     [ApiConventionType(typeof(DefaultApiConventions))]
     [Route("api/[controller]")]
+    [EnableCors("PermitirApiRequest")]
     [ApiController]
     public class AutorizaController : ControllerBase
     {

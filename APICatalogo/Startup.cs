@@ -45,11 +45,10 @@ namespace APICatalogo
         {
             services.AddCors(options =>
             {
-                options.AddPolicy("PermitirApiRequest",
-                    builder => builder.WithOrigins("https://apirequest.io").WithMethods("GET")
-                    );
-                //options.AddPolicy("TudoLiberado",
-                //builder => builder.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin());
+                //options.AddPolicy("PermitirApiRequest",
+                //    builder => builder.WithOrigins("https://apirequest.io").WithMethods("GET")
+                //    );
+                options.AddPolicy("PermitirApiRequest", builder => builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod().Build());
             });
 
             var mappingConfig = new MapperConfiguration(x =>
