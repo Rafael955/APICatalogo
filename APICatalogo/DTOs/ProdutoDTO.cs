@@ -1,7 +1,10 @@
-﻿namespace APICatalogo.DTOs
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace APICatalogo.DTOs
 {
     public class ProdutoDTO
     {
+        [Key]
         public int ProdutoId { get; set; }
 
         public string Nome { get; set; }

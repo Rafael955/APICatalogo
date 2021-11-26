@@ -28,6 +28,11 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.OData.Edm;
+using APICatalogo.Models;
+using APICatalogo.DTOs;
+using Microsoft.AspNet.OData.Extensions;
+using Microsoft.AspNet.OData.Builder;
 
 namespace APICatalogo
 {
@@ -153,6 +158,8 @@ namespace APICatalogo
                     options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
                 });
 
+            services.AddOData();
+
             //Versionamento da API nativo
             //services.AddApiVersioning(options => 
             //{
@@ -161,6 +168,15 @@ namespace APICatalogo
             //    options.ReportApiVersions = true;
             //    options.ApiVersionReader = new HeaderApiVersionReader("x-api-version"); //passa a versão da api pelo header da requisição!
             //});
+
+        }
+
+        private static IEdmModel GetEdmModel()
+        {
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.EntitySet<ProdutoDTO>("ProdutosDTO");
+            builder.EntitySet<CategoriaDTO>("CategoriasDTO");
+            return builder.GetEdmModel();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -211,13 +227,15 @@ namespace APICatalogo
             {
                 c.SwaggerEndpoint("/swagger/v1/swagger.json",
                     "Catálogo de Produtos e Categoria");
-            });
-
+            }); 
+            
             //Adiciona o middleware que executa o endpoint do request atual
             app.UseEndpoints(endpoints =>
             {
                 //adiciona os endpoints para as Actions
                 // dos controladores sem especificar rotas
+                endpoints.EnableDependencyInjection();
+                endpoints.Select().Filter().Expand();
                 endpoints.MapControllers();
             });
         }
